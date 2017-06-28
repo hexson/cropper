@@ -4,16 +4,25 @@
   "version": "1.0.0-beta",
   "author": "hexson",
   "scripts": {
-    "dev": "webpack-dev-server --hot --progress --profile"
+    "dev": "webpack-dev-server --hot --progress --profile",
+    "babel": "babel src/cropper.js -o src/cropper.min.js",
+    "build": "npm run babel && gulp"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.0",
     "babel-preset-es2015": "^6.24.1",
     "css-loader": "^0.28.4",
+    "del": "^3.0.0",
     "extract-text-webpack-plugin": "^2.1.2",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-uglify": "^3.0.0",
+    "gulp-uglifycss": "^1.0.8",
     "html-webpack-plugin": "^2.29.0",
     "style-loader": "^0.18.2",
+    "through2": "^2.0.3",
     "webpack": "^3.0.0",
     "webpack-dev-server": "^2.5.0"
   }
