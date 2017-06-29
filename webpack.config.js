@@ -6,6 +6,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 module.exports = function () {
   return {
     entry: {
+      exif: './src/exif.js',
       main: './src/cropper.js'
     },
     output: {
