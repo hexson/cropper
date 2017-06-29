@@ -1,4 +1,5 @@
 import './cropper.css';
+import EXIF from './exif';
 
 
 (function(w){
@@ -10,6 +11,23 @@ import './cropper.css';
   cropper = function (elem, options) {
     elem = cropper.element(elem);
     cropper.on(elem, 'change', function(event) {
+      // console.log(elem.files[0]);
+      let format = {
+        'jpg': /image\/jp(e?)g/i,
+        'png': /image\/png/i
+      };
+      options.format = options.format || ['jpg', 'png'];
+      let isFormat = false;
+      for (let n = 0; n < options.format.length; n++){
+        if (format[options.format[n]].test(elem.files[0].type)){
+          isFormat = true;
+        }
+      }
+      if (!isFormat) {
+        elem.value = null;
+        alert('The format is incorrect');
+        return;
+      }
       let file = new FileReader();
       let img = new Image();
       let div = doc.createElement('div');
@@ -101,30 +119,58 @@ import './cropper.css';
           }
           event.preventDefault();
         })
-        cropper.on(cancel, 'touchend', () => {
+        cropper.on(cancel, 'touchend', closeCropper)
+        cropper.on(ok, 'touchend', () => {
+          if (Uint8Array&&atob&&Blob){
+            let mul = (options.size || w) / w;
+            EXIF.getData(elem.files[0], function () {
+              EXIF.getAllTags(this);
+              let Orientation = EXIF.getTag(this, 'Orientation'), sx = ex, sy = ey - (h - w) / 2;
+              if (Orientation != "" && Orientation != 1){
+                switch (Orientation){
+                  case 6:
+                    // 顺时针旋转90度
+                    ctx.rotate(90*Math.PI/180);
+                    sy -= (options.size || w);
+                    break;
+                  case 8:
+                    // 逆时针旋转90度
+                    ctx.rotate(-90*Math.PI/180);
+                    sx -= (options.size || w);
+                    break;
+                  case 3:
+                    // 顺时针旋转180度
+                    ctx.rotate(180*Math.PI/180);
+                    sx -= (options.size || w);
+                    sy -= (options.size || w);
+                    break;
+                }
+              }
+              ctx.drawImage(img, 0, 0, width, height, sx, sy, cimg.width * mul, cimg.height * mul);
+              let src = canvas.toDataURL();
+              // open(src);
+              cele.appendChild(canvas);
+              src = src.split(',')[1];
+              src = window.atob(src);
+              let ia = new Uint8Array(src.length);
+              for (let i = 0; i < src.length; i++) {
+                ia[i] = src.charCodeAt(i);
+              };
+              options.success(new Blob([ia], {type:"image/png"}));
+              closeCropper()
+            })
+          }else {
+            alert('Your browser doesn\'t support it')
+          } 
+        })
+
+        function closeCropper () {
           conta.className = 'cropper-container cropper-anime-middle';
           elem.value = null;
           setTimeout(function () {
             cropper.element('body').removeChild(cele);
           }, 350);
-        })
-        cropper.on(ok, 'touchend', () => {
-          if (Uint8Array&&atob&&Blob){
-            let mul = (options.size || w) / w;
-            ctx.drawImage(img, 0, 0, width, height, ex, ey - (h - w) / 2, cimg.width * mul, cimg.height * mul);
-            let src = canvas.toDataURL();
-            cele.appendChild(canvas);
-            src = src.split(',')[1];
-            src = window.atob(src);
-            let ia = new Uint8Array(src.length);
-            for (let i = 0; i < src.length; i++) {
-              ia[i] = src.charCodeAt(i);
-            };
-            options.success(new Blob([ia], {type:"image/png"}));
-          }else {
-            alert('Your browser doesn\'t support it')
-          } 
-        })
+        }
       }
     });
   };
