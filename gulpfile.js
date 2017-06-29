@@ -19,7 +19,7 @@ gulp.task('uglifycss', function(){
 });
 
 gulp.task('uglifyjs', ['uglifycss'], function(){
-  return gulp.src('src/**/*.min.js')
+  return gulp.src(['src/**/*.min.js', 'src/exif.js'])
       .pipe(uglify())
       .pipe(modify(version))
       .pipe(gulp.dest('dist/'));
